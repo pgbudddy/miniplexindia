@@ -1118,7 +1118,7 @@ def add_to_cart(product_id, user_id):
         close_connection(mydb, mycursor)
 
 
-def insert_product(name, brand, discription, price, product_images, category, brightness, contrast_ratio, HDR_HLG, lamp_life_hrs_Normal_rco_mode, type, user_id, bid_price):
+def insert_theater(name, about, price, seats, aminities, policies, address, state, images):
     #print("save_message")
     try:
         # Get a connection from the pool
@@ -1129,42 +1129,18 @@ def insert_product(name, brand, discription, price, product_images, category, br
 
         # Insert into products table (product_id is AUTO_INCREMENT)
         insert_product = """
-            INSERT INTO products(
-                name, brand, discription, price, product_images, category,
-                brightness, contrast_ratio, HDR_HLG,
-                lamp_life_hrs_Normal_rco_mode, type
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO theaters(
+                name, about, price, seats, aminities, policies, address, state, images, datetime
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         mycursor.execute(insert_product, (
-            name, brand, discription, price, product_images, category,
-            brightness, contrast_ratio, HDR_HLG,
-            lamp_life_hrs_Normal_rco_mode, type
+            name, about, price, seats, aminities, policies, address, state, images, date
         ))
         mydb.commit()
 
         # Get the auto-incremented product_id
         product_id = mycursor.lastrowid
-        #print("Inserted product_id:", product_id)
-
-        # Insert into uploaded_products table (or orders, depending on your table name)
-        insert_product_profile = """
-            INSERT INTO uploaded_products(product_id, user_id, datetime)
-            VALUES (%s, %s, %s)
-        """
-        mycursor.execute(insert_product_profile, (product_id, user_id, date))
-        mydb.commit()
-
-        #print("Inserted uploaded_products")
-
-        # Insert into bids table (or orders, depending on your table name)
-        insert_bids = """
-            INSERT INTO bids(user_id, price, product_id, datetime)
-            VALUES (%s, %s, %s, %s)
-        """
-        mycursor.execute(insert_bids, (user_id, bid_price, product_id, date))
-        mydb.commit()
-
-        #print("Inserted bids")
+        print("Inserted product_id:", product_id)
 
         if mycursor.rowcount > 0:
             #print("All data inserted successfully.")
@@ -1174,7 +1150,7 @@ def insert_product(name, brand, discription, price, product_images, category, br
             return False
 
     except Exception as e:
-        #print("Error:", e)
+        print("Error:", e)
         return False
 
     finally:

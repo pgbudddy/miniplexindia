@@ -20,7 +20,8 @@ import urllib3
 from collections import Counter
 from flask_dance.contrib.google import make_google_blueprint, google
 import os
-
+import shutil
+from PIL import Image
 import time
 import firebase_admin
 from firebase_admin import credentials, messaging
@@ -43,7 +44,7 @@ razorpay_client = razorpay.Client(auth=("rzp_test_SWjvcpME4fGCmq", "ZuTowFTbz7vo
 
 
 # Upload folder configuration
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = 'static/images/theater_images'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -729,6 +730,44 @@ def google_login_authorized():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def image_convertor(theater_id):
+    try:
+        source_dir = f'static/images/theater_images/{theater_id}/'
+        webp_images = []
+        count = 1
+
+        for filename in os.listdir(source_dir):
+            if filename.lower().endswith((".jpeg", ".jpg", ".png")):
+                img_path = os.path.join(source_dir, filename)
+                img = Image.open(img_path).convert("RGB")
+                temp_webp_name = f"temp_{uuid.uuid4().hex}.webp"
+                temp_webp_path = os.path.join(source_dir, temp_webp_name)
+                img.save(temp_webp_path, 'webp', quality=10)
+                webp_images.append(temp_webp_name)
+
+        # Delete original jpg/png files
+        for filename in os.listdir(source_dir):
+            if filename.lower().endswith((".jpeg", ".jpg", ".png")):
+                os.remove(os.path.join(source_dir, filename))
+
+        # Rename webp images to 1.webp, 2.webp, ...
+        for i, filename in enumerate(sorted(webp_images), start=1):
+            new_name = f"{i}.webp"
+            os.rename(
+                os.path.join(source_dir, filename),
+                os.path.join(source_dir, new_name)
+            )
+            print(f"✅ Saved: {filename} → {new_name}")
+
+        return True
+
+    except Exception as e:
+        print("❌ Error in image_convertor:", e)
+        return False
+
+    
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
@@ -738,35 +777,77 @@ def upload():
         about = request.form.get('about')
         policies = request.form.get('policies')
         amenities = request.form.getlist('amenities')
-        images = request.files.getlist('images')
+        uploaded_images = request.files.getlist('images')
+        seats = request.form.get('seats')
+        state = request.form.get('state')
 
-        saved_images = []
+        upload_folder = os.path.join('static', 'uploads', 'theater_temp')
+        os.makedirs(upload_folder, exist_ok=True)
 
-        for image in images:
+        saved_image_names = []
+        count = 1
+
+        for image in uploaded_images:
             if image and allowed_file(image.filename):
-                original_filename = secure_filename(image.filename)
-                ext = os.path.splitext(original_filename)[1]  # keep .jpg/.jpeg
-                unique_filename = f"{uuid.uuid4().hex}{ext}"  # e.g., abcd123.jpg
-                path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-                image.save(path)
-                saved_images.append(unique_filename)
+                ext = os.path.splitext(secure_filename(image.filename))[1]
+                unique_filename = f"{uuid.uuid4().hex}_{count}{ext}"
+                save_path = os.path.join(upload_folder, unique_filename)
+                image.save(save_path)
+                saved_image_names.append(unique_filename)
+                count += 1
             else:
-                print('Only JPG images are allowed.', 'danger')
+                print(f"❌ Skipped non-JPG/PNG: {image.filename}")
                 return redirect(request.url)
 
-        # Simulate saving to DB
+        # Temporary folder with random ID before DB insert
+        theater_id = uuid.uuid4().hex[:8]
+        temp_folder = os.path.join('static', 'images', 'theater_images', theater_id)
+        os.makedirs(temp_folder, exist_ok=True)
+
+        for img in saved_image_names:
+            shutil.move(os.path.join(upload_folder, img), os.path.join(temp_folder, img))
+
+        print("📁 Images moved to:", temp_folder)
+
+        # Convert to WEBP
+        executor.submit(image_convertor, theater_id).result()
+
+        # Get final list of .webp images
+        webp_images = sorted([f for f in os.listdir(temp_folder) if f.endswith('.webp')])
+
+        # Insert into DB
+        insert_id = api.insert_theater(
+            name, about, price, seats,
+            ", ".join(amenities), policies,
+            address, state, ", ".join(webp_images)
+        )
+
         print("🎬 Theater Saved:")
         print("Name:", name)
         print("Address:", address)
+        print("Seats:", seats)
+        print("State:", state)
         print("Price:", price)
-        print("Amenities:", amenities)
+        print("Amenities:", ", ".join(amenities))
         print("About:", about)
         print("Policies:", policies)
-        print("Images:", saved_images)
+        print("Saved Images:", ", ".join(webp_images))
+        print("Insert ID:", insert_id)
 
+        # ✅ Rename folder from theater_id → insert_id
+        final_folder = os.path.join('static', 'images', 'theater_images', str(insert_id))
+        os.rename(temp_folder, final_folder)
+        print(f"📁 Folder renamed to: {final_folder}")
+
+        print("✅ Theater uploaded successfully!")
         return redirect(url_for('upload'))
 
     return render_template('upload.html')
+
+
+
+
+
 
 if __name__ == '__main__':
     # app.run(debug=True)
