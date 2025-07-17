@@ -43,8 +43,8 @@ razorpay_client = razorpay.Client(auth=("rzp_test_SWjvcpME4fGCmq", "ZuTowFTbz7vo
 
 
 # Upload folder configuration
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -726,11 +726,47 @@ def google_login_authorized():
     return redirect("/dashboard")
 
 
-@app.route("/upload")
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        address = request.form.get('address')
+        price = request.form.get('price')
+        about = request.form.get('about')
+        policies = request.form.get('policies')
+        amenities = request.form.getlist('amenities')
+        images = request.files.getlist('images')
+
+        saved_images = []
+
+        for image in images:
+            if image and allowed_file(image.filename):
+                original_filename = secure_filename(image.filename)
+                ext = os.path.splitext(original_filename)[1]  # keep .jpg/.jpeg
+                unique_filename = f"{uuid.uuid4().hex}{ext}"  # e.g., abcd123.jpg
+                path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                image.save(path)
+                saved_images.append(unique_filename)
+            else:
+                print('Only JPG images are allowed.', 'danger')
+                return redirect(request.url)
+
+        # Simulate saving to DB
+        print("🎬 Theater Saved:")
+        print("Name:", name)
+        print("Address:", address)
+        print("Price:", price)
+        print("Amenities:", amenities)
+        print("About:", about)
+        print("Policies:", policies)
+        print("Images:", saved_images)
+
+        return redirect(url_for('upload'))
+
     return render_template('upload.html')
-
-
 
 if __name__ == '__main__':
     # app.run(debug=True)
