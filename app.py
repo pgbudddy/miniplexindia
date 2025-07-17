@@ -726,6 +726,9 @@ def google_login_authorized():
     return redirect("/dashboard")
 
 
+@app.route("/upload")
+def upload():
+    return render_template('upload.html')
 
 
 
@@ -733,4 +736,4 @@ if __name__ == '__main__':
     # app.run(debug=True)
     # app = WsgiToAsgi(app)
     #app.run(port=8080, debug=True)
-    socketio.run(app, debug=True, port=8080, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, port=4040, allow_unsafe_werkzeug=True)

@@ -24,7 +24,7 @@
       }
 
       .logo {
-        max-height: 48px;
+        max-height: 50px;
         width: auto;
         object-fit: contain;
       }
@@ -297,7 +297,7 @@
         }
 
         .mobile-logo {
-          height: 40px;
+          height: 50px;
           object-fit: contain;
         }
 
@@ -505,7 +505,7 @@
     <!-- Desktop Header -->
     <header class="desktop-header">
       <img
-        src="{{ url_for('static', filename='images/logo.png') }}"
+        src="{{ url_for('static', filename='images/logo3.png') }}"
         alt="Logo"
         class="logo"
       />
@@ -540,7 +540,7 @@
     <!-- Mobile Header -->
     <header class="mobile-header">
       <img
-        src="{{ url_for('static', filename='images/logo.png') }}"
+        src="{{ url_for('static', filename='images/logo3.png') }}"
         alt="Logo"
         class="mobile-logo"
       />
@@ -619,8 +619,8 @@
       <div class="mobile-popup-content">
         <ul>
           <li><a href="/">Home</a></li>
-          <li><a href="/services">Our Services</a></li>
-          <li><a href="/about">About Us</a></li>
+          <!-- <li><a href="/services">Our Services</a></li> -->
+          <li><a href="https://www.miniplexindia.com">About Us</a></li>
           <li><a href="/bookings">My Bookings</a></li>
           {% if name %}
           <a href="/profile">Welcome, {{ name|title }}</a>
