@@ -40,7 +40,7 @@ app.config['SESSION_TYPE'] = 'filesystem'  # Store session on server
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-razorpay_client = razorpay.Client(auth=("rzp_test_SWjvcpME4fGCmq", "ZuTowFTbz7voWmL6VmstfMgc"))
+razorpay_client = razorpay.Client(auth=("rzp_live_KwWU7BnuboSLCV", "nXSeMZXRHJs0ZcAal1Aljmy5"))
 
 
 # Upload folder configuration

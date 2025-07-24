@@ -1,0 +1,11 @@
+flask
+eventlet
+flask-socketio
+flask-caching
+firebase-admin
+flask-dance
+requests
+Pillow
+asgiref
+razorpay
+mysql-connector-python
