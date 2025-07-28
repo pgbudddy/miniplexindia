@@ -611,6 +611,7 @@
         <p class="address">{{ theater.address }}</p>
 
         <h3>Amenities</h3>
+        <p style="font-size: 13px; margin-top: -10px;">We will charged extra *</p>
         <div class="amenity-list">
           {% for item in theater.amenities %}
           <div>
@@ -651,6 +652,7 @@
             background: #2a2a2a;
             color: white;
           "
+          placeholder="Select Date"
         />
 
         <div class="slots">
@@ -834,6 +836,7 @@
         </div>
 
         <h3 class="mobile-section-title">Amenities</h3>
+        <p style="font-size: 13px; margin-top: -10px;">We will charged extra *</p>
         <div class="mobile-amenities">
           {% for item in theater.amenities %}
           <div class="mobile-amenity">

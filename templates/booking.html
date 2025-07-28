@@ -402,6 +402,26 @@
           <option value="Yes">Yes</option>
         </select>
 
+        <label>Do you want Photoshoot?</label>
+        <select name="photoshoot" required>
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+
+        <label>Do you want Cake?</label>
+        <select name="cake" required>
+          <option value="No">No</option>
+          <option value="basic">Basic</option>
+          <option value="custom">Custom Charges can we change as per your requirement</option>
+        </select>
+
+        <label>Do you want to add Flower Bouquet</label>
+        <select name="flower_bouquet" required>
+          <option value="No">No</option>
+          <option value="basic">Basic</option>
+          <option value="custom">Custom Charges can we change as per your requirement</option>
+        </select>
+
         <input type="hidden" name="total_price" id="total_price_input" />
 
         <br /><br />
@@ -430,6 +450,18 @@
       <div class="summary-item">
         <span>Decoration</span>
         <span>₹<span id="decoration-price">0</span></span>
+      </div>
+      <div class="summary-item">
+        <span>Photoshoot</span>
+        <span>₹<span id="photoshoot-price">0</span></span>
+      </div>
+      <div class="summary-item">
+        <span>Cake</span>
+        <span>₹<span id="cake-price">0</span></span>
+      </div>
+      <div class="summary-item">
+        <span>Flower Bouquet</span>
+        <span>₹<span id="flower-price">0</span></span>
       </div>
       <div class="summary-item">
         <span>Tax 18% GST</span>
@@ -484,7 +516,7 @@
         <input type="text" name="name" required />
 
         <label>Number of People</label>
-        <input type="number" name="people_count" value="2" required />
+        <input type="number" id="people_count_m" name="people_count" value="2" required />
 
         <label>WhatsApp Number</label>
         <input type="number" name="whatsapp" required />
@@ -502,6 +534,25 @@
           <option value="Yes">Yes</option>
         </select>
 
+        <label>Do you want Photoshoot?</label>
+        <select name="photoshoot" required>
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+
+        <label>Do you want Cake?</label>
+        <select name="cake" required>
+          <option value="No">No</option>
+          <option value="basic">Basic</option>
+          <option value="custom">Custom Charges can we change as per your requirement</option>
+        </select>
+
+        <label>Do you want to add Flower Bouquet</label>
+        <select name="flower_bouquet" required>
+          <option value="No">No</option>
+          <option value="basic">Basic</option>
+          <option value="custom">Custom Charges can we change as per your requirement</option>
+        </select>
         <input type="hidden" name="total_price" id="total_price_input_mobile" />
       </form>
 
@@ -514,6 +565,18 @@
       <div class="summary-item">
         <span>Decoration</span>
         <span>₹<span id="decoration-price-m">0</span></span>
+      </div>
+      <div class="summary-item">
+        <span>Photoshoot</span>
+        <span>₹<span id="photoshoot-price-m">0</span></span>
+      </div>
+      <div class="summary-item">
+        <span>Cake</span>
+        <span>₹<span id="cake-price-m">0</span></span>
+      </div>
+      <div class="summary-item">
+        <span>Flower Bouquet</span>
+        <span>₹<span id="flower-price-m">0</span></span>
       </div>
       <div class="summary-item">
         <span>Tax</span>
@@ -579,53 +642,90 @@
 
 
   function calculatePrice() {
-    // Detect which decoration input is visible and active
-    const mobileDecoration = document.querySelector('#mobile-booking-form select[name="decoration"]');
-    const desktopDecoration = document.querySelector('form:not(#mobile-booking-form) select[name="decoration"]');
+  const base = 1200;
 
-    const decorationValue = mobileDecoration?.offsetParent !== null
-      ? mobileDecoration.value
-      : desktopDecoration?.value;
+  // Detect which input is visible (mobile or desktop)
+  const isMobile = document.getElementById("mobile-booking-form")?.offsetParent !== null;
 
-    const peopleCountInput = document.querySelector('input[name="people_count"]');
-    const peopleCount = parseInt(peopleCountInput?.value || 0);
+  const peopleCountInput = isMobile
+    ? document.querySelector('#mobile-booking-form input[name="people_count"]')
+    : document.querySelector('form:not(#mobile-booking-form) input[name="people_count"]');
+  const peopleCount = parseInt(peopleCountInput?.value || 0);
 
-    const base = 1000;
-    const decorationCost = decorationValue === "Yes" ? 1000 : 0;
-    const tax = Math.round((base + decorationCost) * 0.18);
-    const total = base + decorationCost + tax;
+  const getFieldValue = (fieldName) => {
+    const mobileField = document.querySelector(`#mobile-booking-form select[name="${fieldName}"]`);
+    const desktopField = document.querySelector(`form:not(#mobile-booking-form) select[name="${fieldName}"]`);
+    return mobileField?.offsetParent !== null ? mobileField?.value : desktopField?.value;
+  };
 
-    // Desktop summary
-    document.getElementById("people-count-display").innerText = peopleCount;
-    document.getElementById("base-price").innerText = base;
-    document.getElementById("decoration-price").innerText = decorationCost;
-    document.getElementById("tax-amount").innerText = tax;
-    document.getElementById("total-price").innerText = total;
-    if (document.getElementById("total_price_input")) {
-      document.getElementById("total_price_input").value = total;
-    }
+  const decorationValue = getFieldValue("decoration");
+  const photoshootValue = getFieldValue("photoshoot");
+  const cakeValue = getFieldValue("cake");
+  const flowerValue = getFieldValue("flower_bouquet");
 
-    // Mobile summary
-    document.getElementById("people-count-display-m").innerText = peopleCount;
-    document.getElementById("base-price-m").innerText = base;
-    document.getElementById("decoration-price-m").innerText = decorationCost;
-    document.getElementById("tax-amount-m").innerText = tax;
-    document.getElementById("total-price-m").innerText = total;
-    if (document.getElementById("total_price_input_mobile")) {
-      document.getElementById("total_price_input_mobile").value = total;
-    }
-  }
+  // Pricing logic
+  const decorationCost = decorationValue === "Yes" ? 1200 : 0;
+  const photoshootCost = photoshootValue === "Yes" ? 1000 : 0;
+  const cakeCost = cakeValue === "basic" ? 699 : 0;
+  const flowerCost = flowerValue === "basic" ? 599 : 0;
+
+  const subtotal = base + decorationCost + photoshootCost + cakeCost + flowerCost;
+  const tax = Math.round(subtotal * 0.18);
+  const total = subtotal + tax;
+
+  // Update both Desktop & Mobile
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
+  };
+
+  const setValue = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  };
+
+  // Common updates
+  setText("people-count-display", peopleCount);
+  setText("base-price", base);
+  setText("decoration-price", decorationCost);
+  setText("photoshoot-price", photoshootCost);
+  setText("cake-price", cakeCost);
+  setText("flower-price", flowerCost);
+  setText("tax-amount", tax);
+  setText("total-price", total);
+  setValue("total_price_input", total);
+
+  setText("people-count-display-m", peopleCount);
+  setText("base-price-m", base);
+  setText("decoration-price-m", decorationCost);
+  setText("photoshoot-price-m", photoshootCost);
+  setText("cake-price-m", cakeCost);
+  setText("flower-price-m", flowerCost);
+  setText("tax-amount-m", tax);
+  setText("total-price-m", total);
+  setValue("total_price_input_mobile", total);
+}
 
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const peopleInputs = document.querySelectorAll('input[name="people_count"]');
-    const decorationSelects = document.querySelectorAll('select[name="decoration"]');
 
-    peopleInputs.forEach(input => input.addEventListener("input", calculatePrice));
-    decorationSelects.forEach(select => select.addEventListener("change", calculatePrice));
 
-    // Initial price update
-    calculatePrice();
+document.addEventListener("DOMContentLoaded", function () {
+  const peopleInputs = document.querySelectorAll('input[name="people_count"]');
+  const selects = document.querySelectorAll('select');
+
+  // Watch both desktop & mobile inputs
+  peopleInputs.forEach(input => {
+    input.addEventListener("input", calculatePrice);
+    input.addEventListener("change", calculatePrice);
   });
+
+  selects.forEach(select => {
+    select.addEventListener("change", calculatePrice);
+  });
+
+  calculatePrice(); // initial run
+});
+
+
 
 </script>

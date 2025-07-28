@@ -504,6 +504,9 @@ def booking():
         whatsapp = request.form.get('whatsapp')
         email = request.form.get('email')
         decoration = request.form.get('decoration')
+        photoshoot = request.form.get('photoshoot')
+        cake = request.form.get('cake')
+        flower_bouquet = request.form.get('flower_bouquet')
         total_price = request.form.get('total_price')
         theater_id = request.form.get('theater_id')
         selected_date = request.form.get('selected_date')
@@ -512,7 +515,7 @@ def booking():
         booking_id = f"BK{int(time.time() * 1000)}{random.randint(100, 999)}"
 
         print(f"Received Booking: Name={name}, selected_date={selected_date}, selected_time={selected_time}, "
-              f"People={people_count}, WhatsApp={whatsapp}, Email={email}, Decoration={decoration}, "
+              f"People={people_count}, WhatsApp={whatsapp}, Email={email}, Decoration={decoration}, photoshoot={photoshoot}, cake={cake}, flower_bouquet={flower_bouquet},"
               f"Total Price={total_price}, theater_id={theater_id}")
 
         # We'll store the result of the thread here
@@ -521,7 +524,7 @@ def booking():
         def process_booking():
             success = api.theater_booking(
                 theater_id, username, total_price, people_count,
-                selected_date, selected_time, decoration,
+                selected_date, selected_time, decoration, photoshoot, cake, flower_bouquet,
                 name, whatsapp, email, booking_id, "pending"
             )
             result['success'] = success

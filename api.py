@@ -277,7 +277,7 @@ def signup(name, email, number, password, public_ip):
         close_connection(mydb, mycursor)
 
 
-def theater_booking(theater_id, username, price, no_people, booking_date, time_slot, decoration, name, whatsapp, email, booking_id, status):
+def theater_booking(theater_id, username, price, no_people, booking_date, time_slot, decoration, photoshoot, cake, flower_bouquet, name, whatsapp, email, booking_id, status):
     try:
         # Get a connection from the pool
         mydb = get_db_connection()
@@ -288,7 +288,7 @@ def theater_booking(theater_id, username, price, no_people, booking_date, time_s
         date = datetime.datetime.now()
         # public_ip = get_public_ip()
 
-        trade = "INSERT INTO theater_booking (theater_id, username, price, no_people, booking_date, time_slot, decoration, name, whatsapp, email, booking_id, status, datetime) values ('"+str(theater_id)+"', '"+str(username)+"', '"+str(price)+"', '"+str(no_people)+"', '"+str(booking_date)+"', '"+str(time_slot)+"', '"+str(decoration)+"', '"+str(name)+"', '"+str(whatsapp)+"', '"+str(email)+"', '"+str(booking_id)+"', '"+str(status)+"', '"+str(date)+"')"
+        trade = "INSERT INTO theater_booking (theater_id, username, price, no_people, booking_date, time_slot, decoration, photoshoot, cake, flower_bouquet, name, whatsapp, email, booking_id, status, datetime) values ('"+str(theater_id)+"', '"+str(username)+"', '"+str(price)+"', '"+str(no_people)+"', '"+str(booking_date)+"', '"+str(time_slot)+"', '"+str(decoration)+"', '"+str(photoshoot)+"', '"+str(cake)+"', '"+str(flower_bouquet)+"', '"+str(name)+"', '"+str(whatsapp)+"', '"+str(email)+"', '"+str(booking_id)+"', '"+str(status)+"', '"+str(date)+"')"
         mycursor.execute(trade)
         mydb.commit()
         
