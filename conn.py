@@ -1,36 +1,24 @@
-import os
-import time
-import mysql.connector
-from mysql.connector import pooling, Error
+from mysql.connector import pooling
 
-DB_RETRIES = int(os.getenv("DB_RETRIES", 30))
-DB_RETRY_DELAY = float(os.getenv("DB_RETRY_DELAY", 2))
-
+# Database configuration
 dbconfig = {
-    "host": os.getenv("MYSQL_HOST", "localhost"),
-    "user": os.getenv("MYSQL_USER", "root"),
-    "password": os.getenv("MYSQL_PASSWORD", "0909BH0705VV0102HS"),
-    "database": os.getenv("MYSQL_DB", "miniplex"),
-    "port": int(os.getenv("MYSQL_PORT", 3306)),
+    "host": "localhost",
+    "user": "root",
+    "password": "0909BH0705VV0102HS",
+    "database": "miniplex"
 }
 
-def _create_pool():
-    last_err = None
-    for attempt in range(1, DB_RETRIES + 1):
-        try:
-            print(f"[DB] Trying to connect (attempt {attempt}/{DB_RETRIES}) to {dbconfig['host']}:{dbconfig['port']}")
-            return pooling.MySQLConnectionPool(pool_name="mypool", pool_size=10, **dbconfig)
-        except Error as e:
-            last_err = e
-            time.sleep(DB_RETRY_DELAY)
-    raise last_err
-
-connection_pool = _create_pool()
+# Create the connection pool
+connection_pool = pooling.MySQLConnectionPool(pool_name="mypool",
+                                              pool_size=10,
+                                              **dbconfig)
 
 def get_db_connection():
+    """Function to get a connection from the pool."""
     return connection_pool.get_connection()
 
 def close_connection(mydb, mycursor):
+    """Function to close the cursor and connection."""
     if mydb.is_connected():
         mycursor.close()
         mydb.close()

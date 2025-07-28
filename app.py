@@ -385,8 +385,7 @@ def theaterdetails(theater_id):
     else:
         executor.submit(api.insert_log, "none", "theaterdetails", "none")
         name = None
-        return render_template("theaterdetails.html", name=None, theater=theater)
-        
+        return render_template("theaterdetails.html", name=None, theater=theater)        
     
 
 @app.route('/profile')
@@ -423,6 +422,41 @@ def profile():
 
         return render_template('profile.html', name=name, bookings=bookings)
 
+
+@app.route('/mybooking')
+def mybooking():
+    username = request.cookies.get('username')
+    print("username ", username)
+
+    if not username:
+        executor.submit(api.insert_log, "None", "profile", "none")
+        return redirect(url_for('login'))
+    
+    else:
+        future_user = executor.submit(api.fetch_userid, username)
+        user_data = future_user.result()
+        name = user_data[0] if user_data else 'User'
+        executor.submit(api.insert_log, name, "profile", "none")
+
+        fetch_booking_history = api.fetch_user_booking(username)
+
+        print("fetch_booking_history: ", fetch_booking_history)
+
+        # Convert raw booking data to renderable format
+        bookings = []
+        for booking in fetch_booking_history:
+            bookings.append({
+                "theater_name": booking["theater_name"],  # Or fetch actual name from another table if needed
+                "image_url": f"images/theater_images/{booking['theater_id']}/1.webp",
+                "date": datetime.datetime.strptime(booking["booking_date"], "%Y-%m-%d").strftime("%d %B %Y"),
+                "time": booking["time_slot"],
+                "people": booking["no_people"],
+                "status": booking["status"],
+                "amount_paid": booking["price"]
+            })
+
+        return render_template('mybooking.html', name=name, bookings=bookings)
+    
 
 @app.route('/place_book', methods=['GET', 'POST'])
 def place_book():
@@ -766,7 +800,6 @@ def image_convertor(theater_id):
         print("❌ Error in image_convertor:", e)
         return False
 
-    
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():

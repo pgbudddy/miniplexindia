@@ -374,7 +374,7 @@ def send_mail(receiver_email, otp):
     sender_alias = "noreply@avcircles.com"  # Custom domain email
 
     # Email subject
-    subject = "Welcome to AV Circle"
+    subject = "Welcome to Miniplexindia"
 
     # HTML content with absolute URLs
     html_body = """
@@ -431,12 +431,12 @@ def send_mail(receiver_email, otp):
             <div class="mainbox">
                 <img src="{{ url_for('static', filename='images/play_store_logo.png') }}"style="width: 50px;" alt="Logo">
                 <p>Hello User,</p>
-                <p>Welcome to AV Circle! Your verification code is:</p>
+                <p>Welcome to Miniplexindia! Your verification code is:</p>
                 <h1>""" + str(otp) + """</h1>
                 <br>
                 <div class="line"></div>
                 <img src="{{ url_for('static', filename='images/play_store_logo.png') }}" style="margin-top: 30px; width: 30px;" alt="Logo">
-                <p style="font-size: 13px;">Regards,<br>AV Circle Team</p>
+                <p style="font-size: 13px;">Regards,<br>Miniplexindia Team</p>
             </div>
         </body>
     </html>
@@ -444,7 +444,7 @@ def send_mail(receiver_email, otp):
 
     # Setup the MIME
     message = MIMEMultipart()
-    message["From"] = f"AV Circle <{sender_alias}>"  # Format with display name
+    message["From"] = f"Miniplexindia <{sender_alias}>"  # Format with display name
     message["To"] = receiver_email
     message["Subject"] = subject
 
