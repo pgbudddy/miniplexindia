@@ -421,7 +421,8 @@
         <label>Do you want Decoration?</label>
         <select name="decoration" required>
           <option value="No">No</option>
-          <option value="Yes">Yes</option>
+          <option value="basic">Basic</option>
+          <option value="custom">Custom Charges can we change as per your requirement</option>
         </select>
 
         <label>Do you want Photoshoot?</label>
@@ -553,7 +554,8 @@
         <label>Do you want Decoration?</label>
         <select name="decoration" required>
           <option value="No">No</option>
-          <option value="Yes">Yes</option>
+          <option value="basic">Basic</option>
+          <option value="custom">Custom Charges can we change as per your requirement</option>
         </select>
 
         <label>Do you want Photoshoot?</label>
@@ -690,7 +692,7 @@
   const flowerValue = getFieldValue("flower_bouquet");
 
   // Pricing logic
-  const decorationCost = decorationValue === "Yes" ? 1200 : 0;
+  const decorationCost = decorationValue === "basic" ? 1200 : 0;
   const photoshootCost = photoshootValue === "Yes" ? 1000 : 0;
   const cakeCost = cakeValue === "basic" ? 699 : 0;
   const flowerCost = flowerValue === "basic" ? 599 : 0;
