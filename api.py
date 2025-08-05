@@ -676,6 +676,31 @@ def buy_product(product_id):
         close_connection(mydb, mycursor)
 
 
+def delete_theater(theater_id):
+    try:
+        mydb = get_db_connection()
+        mycursor = mydb.cursor(buffered=True)
+
+        # Delete the theater
+        query = 'DELETE FROM theaters WHERE theater_id = %s'
+        mycursor.execute(query, (theater_id,))
+        mydb.commit()
+
+        # Check if any row was deleted
+        if mycursor.rowcount > 0:
+            return True
+        else:
+            return False
+
+    except Exception as e:
+        print("Error deleting theater:", str(e))
+        return False
+
+    finally:
+        close_connection(mydb, mycursor)
+
+
+
 def fetch_theater_details(theater_id):
     try:
         mydb = get_db_connection()
@@ -690,7 +715,7 @@ def fetch_theater_details(theater_id):
             return None
 
         # Fetch booked slots for this theater
-        slot_query = 'SELECT time_slot FROM theater_booking WHERE theater_id = %s AND status = "confirm" and status = "pending"'
+        slot_query = 'SELECT time_slot FROM theater_booking WHERE theater_id = %s AND (status = "confirm" OR status = "pending")'
         mycursor.execute(slot_query, (theater_id,))
         slot_results = mycursor.fetchall()
 
@@ -1155,6 +1180,101 @@ def insert_theater(name, about, price, seats, aminities, policies, address, stat
 
     finally:
         close_connection(mydb, mycursor)
+
+
+def seller_theater_details():
+    mydb = get_db_connection()
+
+        # Create a cursor from the connection
+    mycursor = mydb.cursor(buffered=True)
+    
+    mycursor.execute("SELECT name, address, price, theater_id FROM theaters")
+    results = mycursor.fetchall()
+    close_connection(mydb, mycursor)
+
+    return results
+
+
+def update_theater(name, about, price, seats, aminities, address, state, theater_id):
+    try:
+        mydb = get_db_connection()
+        mycursor = mydb.cursor(buffered=True)
+
+        update_query = """
+            UPDATE theaters 
+            SET name = %s, about = %s, price = %s, seats = %s, aminities = %s, address = %s, state = %s
+            WHERE theater_id = %s
+        """
+        mycursor.execute(update_query, (
+            name, about, price, seats, aminities, address, state, theater_id
+        ))
+
+        mydb.commit()
+
+        if mycursor.rowcount > 0:
+            print("✅ Theater updated successfully")
+            return True
+        else:
+            print("⚠️ No theater was updated (check theater_id)")
+            return False
+
+    except Exception as e:
+        print("❌ Error updating theater:", e)
+        return False
+
+    finally:
+        close_connection(mydb, mycursor)
+
+
+def seller_booking_details():
+    mydb = get_db_connection()
+    mycursor = mydb.cursor(buffered=True)
+
+    query = """
+        SELECT 
+            tb.theater_id, 
+            t.name AS theater_name, 
+            tb.whatsapp, 
+            tb.name,  -- This may be the user/customer name
+            tb.booking_date, 
+            tb.time_slot, 
+            tb.decoration, 
+            tb.photoshoot, 
+            tb.cake, 
+            tb.flower_bouquet, 
+            tb.price, 
+            tb.booking_id, 
+            tb.status, 
+            tb.datetime
+        FROM 
+            theater_booking tb 
+        JOIN 
+            theaters t ON tb.theater_id = t.theater_id
+    """
+    mycursor.execute(query)
+    raw_results = mycursor.fetchall()
+
+    # Get column names
+    columns = [desc[0] for desc in mycursor.description]
+
+    # Combine into list of dicts with amenities string
+    booking_details = []
+    for row in raw_results:
+        record = dict(zip(columns, row))
+
+        # Create amenities string
+        amenities = []
+        for amenity in ['decoration', 'photoshoot', 'cake', 'flower_bouquet']:
+            if record[amenity] and record[amenity].lower() == 'yes':
+                amenities.append(amenity.capitalize())
+            elif record[amenity] not in (None, '', 'No', 'no'):
+                amenities.append(f"{amenity.capitalize()} ({record[amenity]})")
+
+        record['amenities'] = ", ".join(amenities) if amenities else "None"
+        booking_details.append(record)
+
+    close_connection(mydb, mycursor)
+    return booking_details
 
 
 def image_convertor(product_id):
