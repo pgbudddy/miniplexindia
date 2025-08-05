@@ -151,51 +151,48 @@
   <div class="right-side">
     <h2>Upload Theater</h2>
 
-    <!-- Upload Form -->
     <form action="" method="POST" enctype="multipart/form-data">
-      <label for="images">Upload Images (JPG only)</label>
-      <input type="file" name="images" id="image-input" multiple required accept=".jpg,.jpeg" />
-      <div id="preview-area"></div>
-
       <label for="name">Theater Name</label>
-      <input type="text" name="name" required />
-
+      <input type="text" name="name" required value="{{ theater.name }}" />
+    
       <label for="address">Address</label>
-      <input type="text" name="address" required />
-
+      <input type="text" name="address" required value="{{ theater.address }}" />
+    
       <label for="seats">Select Seats</label>
       <select name="seats" required>
-        <option value="" disabled selected>Select Seats</option>
-        <option value="2_5">2-5</option>
-        <option value="5_10">5-10</option>
-        <option value="10_15">10-15</option>
-        <option value="15_20">15-20</option>
-        <option value="20_25">20-25</option>
-        <option value="25_100">25-100</option>
+        <option value="" disabled>Select Seats</option>
+        <option value="2_5" {% if theater.seats == '2_5' %}selected{% endif %}>2-5</option>
+        <option value="5_10" {% if theater.seats == '5_10' %}selected{% endif %}>5-10</option>
+        <option value="10_15" {% if theater.seats == '10_15' %}selected{% endif %}>10-15</option>
+        <option value="15_20" {% if theater.seats == '15_20' %}selected{% endif %}>15-20</option>
+        <option value="20_25" {% if theater.seats == '20_25' %}selected{% endif %}>20-25</option>
+        <option value="25_100" {% if theater.seats == '25_100' %}selected{% endif %}>25-100</option>
       </select>
-
+    
       <label for="price">Price (₹/slot)</label>
-      <input type="number" name="price" required />
-
+      <input type="number" name="price" required value="{{ theater.price }}" />
+    
       <label for="state">Select State</label>
       <select name="state" required>
-        <option value="" disabled selected>Select State</option>
-        <option value="Gurgaon">Gurgaon</option>
+        <option value="" disabled>Select State</option>
+        <option value="Gurgaon" {% if theater.state == 'Gurgaon' %}selected{% endif %}>Gurgaon</option>
       </select>
-
+    
       <label>Amenities</label>
       <div class="amenities">
-        <label><input type="checkbox" name="amenities" value="Food & Beverages" />Food & Beverages</label>
-        <label><input type="checkbox" name="amenities" value="Screening" />Screening</label>
-        <label><input type="checkbox" name="amenities" value="Cakes" />Cakes</label>
-        <label><input type="checkbox" name="amenities" value="Decoration" />Decoration</label>
+        {% set amenity_list = theater.aminities.split(',') | map('trim') | list %}
+        <label><input type="checkbox" name="amenities" value="Food & Beverages" {% if 'Food & Beverages' in amenity_list %}checked{% endif %}/>Food & Beverages</label>
+        <label><input type="checkbox" name="amenities" value="Screening" {% if 'Screening' in amenity_list %}checked{% endif %}/>Screening</label>
+        <label><input type="checkbox" name="amenities" value="Cakes" {% if 'Cakes' in amenity_list %}checked{% endif %}/>Cakes</label>
+        <label><input type="checkbox" name="amenities" value="Decoration" {% if 'Decoration' in amenity_list %}checked{% endif %}/>Decoration</label>
       </div>
-
+    
       <label for="about">About this Theater</label>
-      <textarea name="about" rows="4" required></textarea>
-
-      <button type="submit">Upload Theater</button>
+      <textarea name="about" rows="4" required>{{ theater.about }}</textarea>
+    
+      <button type="submit">Update Theater</button>
     </form>
+    
 
   </div>
 </div>

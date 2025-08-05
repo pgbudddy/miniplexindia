@@ -666,8 +666,8 @@ def verify():
             print("Username:", data['user']['username'])
 
 
-        #api.insert_orders(str(data['user']['theater_id']), str(data['user']['username']), str(data['user']['price']), "pending", str(data['order_id']))
-        # confirm_booking = api.update_theater_booking("confirm", str(data['order_id']))
+        api.insert_orders(str(data['user']['theater_id']), str(data['user']['username']), str(data['user']['price']), "confirm", str(data['order_id']))
+        #confirm_booking = api.update_theater_booking("confirm", str(data['order_id']))
 
         # print("confirm_booking ", confirm_booking)
         
@@ -811,7 +811,8 @@ def upload():
         address = request.form.get('address')
         price = request.form.get('price')
         about = request.form.get('about')
-        policies = request.form.get('policies')
+        # policies = request.form.get('policies')
+        policies = "None"
         amenities = request.form.getlist('amenities')
         uploaded_images = request.files.getlist('images')
         seats = request.form.get('seats')
@@ -881,9 +882,127 @@ def upload():
     return render_template('upload.html')
 
 
+@app.route("/sellerdashboard", methods=['GET', 'POST'])
+def sellerdashboard():
+    theater_data = api.seller_theater_details()
+    print("theaters ", theater_data)
+
+    # theaters = [
+    #     {"name": "Cinema Galaxy", "address": "MG Road, Delhi", "price": 1200},
+    #     {"name": "PVR Icon", "address": "Bandra, Mumbai", "price": 1500},
+    #     {"name": "INOX Crystal", "address": "Koramangala, Bangalore", "price": 1000},
+    # ]
+
+    theaters = []
+    for t in theater_data:
+        theaters.append({
+            "name": t[0],
+            "address": t[1],
+            "price": t[2],
+            "theater_id": t[3]
+        })
+
+    print("theaters ", theater_data)
+    
+    return render_template('sellerdashboard.html', theaters=theaters)
 
 
+@app.route("/bookingdashboard", methods=['GET', 'POST'])
+def bookingdashboard():
+    raw_bookings = api.seller_booking_details()
+    print("Raw booking_details ", raw_bookings)
 
+    processed_details = []
+    for entry in raw_bookings:
+        # Extract values safely from dictionary
+        theater_id = entry.get("theater_id", "")
+        theater_name = entry.get("theater_name", "")
+        name = entry.get("name", "")
+        whatsapp = entry.get("whatsapp", "")
+        booking_date = entry.get("booking_date", "")
+        time_slot = entry.get("time_slot", "")
+        decoration = entry.get("decoration", "")
+        photoshoot = entry.get("photoshoot", "")
+        cake = entry.get("cake", "")
+        flower_bouquet = entry.get("flower_bouquet", "")
+        price = entry.get("price", "")
+        booking_id = entry.get("booking_id", "")
+        status = entry.get("status", "")
+        datetime = entry.get("datetime", "")
+
+        # Process amenities
+        amenities_list = []
+        if decoration.lower() in ["yes", "basic", "custom"]:
+            amenities_list.append(f"Decoration ({decoration})" if decoration not in ["yes"] else "Decoration")
+        if photoshoot.lower() == "yes":
+            amenities_list.append("Photoshoot")
+        if cake.lower() in ["yes", "basic", "custom"]:
+            amenities_list.append(f"Cake ({cake})" if cake != "yes" else "Cake")
+        if flower_bouquet.lower() in ["yes", "basic", "custom"]:
+            amenities_list.append(f"Flower_bouquet ({flower_bouquet})" if flower_bouquet != "yes" else "Flower Bouquet")
+
+        processed_details.append({
+            "theater_id": theater_id,
+            "theater_name": theater_name,
+            "name": name,
+            "whatsapp": whatsapp,
+            "booking_date": booking_date,
+            "time_slot": time_slot,
+            "price": price,
+            "booking_id": booking_id,
+            "status": status,
+            "datetime": datetime,
+            "amenities": ", ".join(amenities_list) if amenities_list else "None"
+        })
+
+    return render_template('bookingdashboard.html', bookings=processed_details)
+
+
+@app.route("/edit_seller_theater", methods=["GET", "POST"])
+def edit_seller_theater():
+    theater_id = request.args.get("id")
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        address = request.form.get("address")
+        seats = request.form.get("seats")
+        price = request.form.get("price")
+        state = request.form.get("state")
+        about = request.form.get("about")
+        amenities = request.form.getlist("amenities")  # This gives a list of checked boxes
+        aminities_str = ", ".join(amenities)
+
+        print("🔁 Updating Theater:", theater_id)
+        print("✅ Received:", name, address, seats, price, state, aminities_str, about)
+
+        # Call your update function
+        updated = api.update_theater(
+            name, about, price, seats, aminities_str, address, state, theater_id
+        )
+
+        if updated:
+            return redirect("/sellerdashboard")  # ✅ Redirect after success
+        else:
+            return "Update failed", 400
+
+    # GET request — show form
+    fetch_theater_details = api.fetch_theater_details(theater_id)
+    return render_template("edit_seller_theater.html", theater_id=theater_id, theater=fetch_theater_details)
+
+
+@app.route("/delete_theater", methods=["POST"])
+def delete_theater():
+    data = request.get_json()
+    theater_id = data.get("id")
+
+    print("Delete theater_id ", theater_id)
+
+    delete = api.delete_theater(theater_id)
+
+    print("delete ", delete)
+
+    return jsonify({"success": True})
+    
 
 if __name__ == '__main__':
     # app.run(debug=True)

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Theater List - Table View</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .left-side {
+      width: 15%;
+      background-color: #f4f4f4;
+      padding: 20px;
+      box-sizing: border-box;
+      border-right: 1px solid #ccc;
+    }
+
+    .left-side button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .right-side {
+      width: 85%;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+<div id="loader-overlay"
+style="display: none; position: fixed; top: 0; left: 0; width: 100%;
+       height: 100%; background: rgba(255, 255, 255, 0.8); z-index: 9999;
+       justify-content: center; align-items: center;">
+<div style="border: 6px solid #f3f3f3; border-top: 6px solid #333;
+         border-radius: 50%; width: 50px; height: 50px;
+         animation: spin 1s linear infinite;"></div>
+</div>
+
+<div class="container">
+  <!-- Left Panel -->
+  <div class="left-side">
+    <a href="/sellerdashboard" style="text-decoration: none; -webkit-tap-highlight-color: transparent;"><button>All Theaters</button></a>
+    <a href="/upload" style="text-decoration: none; -webkit-tap-highlight-color: transparent;"><button>Upload Theater</button></a>
+    <a href="/bookingdashboard" style="text-decoration: none; -webkit-tap-highlight-color: transparent;"><button>Booking Dashboard</button></a>
+  </div>
+
+  <!-- Right Panel with Table -->
+  <div class="right-side">
+    <h2>Booking List</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Theater Name</th>
+          <th>Client Name</th>
+          <th>Client Number</th>
+          <th>Booked Date</th>
+          <th>Time Slot</th>
+          <th>Other Aminities</th>
+          <th>Paid Amount</th>
+          <th>Booking Id</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td>{{ booking.theater_name }}</td>
+          <td>{{ booking.name }}</td>
+          <td>{{ booking.whatsapp }}</td>
+          <td>{{ booking.booking_date }}</td>
+          <td>{{ booking.time_slot }}</td>
+          <td>{{ booking.amenities }}</td>
+          <td>₹{{ booking.price }}</td>
+          <td>{{ booking.booking_id }}</td>
+          <td>{{ booking.status }}</td>
+          <td>{{ booking.datetime }}</td>
+          <input type="hidden" name="theater_id" id="theater_id" value="{{ booking.theater_id }}">
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.querySelector('form').addEventListener('submit', function () {
+    document.getElementById('loader-overlay').style.display = 'flex';
+  });
+
+  document.getElementById("image-input").addEventListener("change", function (e) {
+    const files = e.target.files;
+    const previewArea = document.getElementById("preview-area");
+    previewArea.innerHTML = "";
+
+    for (let file of files) {
+      const isJPG = file.type === "image/jpeg" || file.name.toLowerCase().endsWith(".jpg");
+      if (isJPG) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const img = document.createElement("img");
+          img.src = event.target.result;
+          img.className = "preview-thumb";
+          previewArea.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("❌ Only JPG images are allowed: " + file.name);
+      }
+    }
+  });
+
+</script>
+
+</body>
+</html>
